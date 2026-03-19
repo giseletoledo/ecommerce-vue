@@ -30,7 +30,7 @@ app.use(PrimeVue, {
     theme: {
         preset: Aura,
         options: {
-            darkModeSelector: '.dark-mode', // Para desafio dark mode
+            darkModeSelector: '.dark',
         }
     }
 })

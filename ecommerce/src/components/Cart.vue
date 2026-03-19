@@ -131,8 +131,19 @@ export default defineComponent({
   emits: ['add-to-cart', 'remove-unit', 'remove-item', 'clear-cart'],
 
   methods: {
-    updateQuantity(productId: number, quantity: number) {
-      // Implementar lógica de atualização
+
+
+    updateQuantity(productId: number, quantity: number | null) {
+      if (!quantity || quantity < 1) return
+      // Ajusta a quantidade emitindo add ou remove até chegar no valor desejado
+      const item = this.cart.cartItems.find((i) => i.product.id === productId)
+      if (!item) return
+      const diff = quantity - item.quantity
+      if (diff > 0) {
+        for (let i = 0; i < diff; i++) this.$emit('add-to-cart', item.product)
+      } else {
+        for (let i = 0; i < Math.abs(diff); i++) this.$emit('remove-unit', productId)
+      }
     },
 
     confirmRemoveItem(productId: number) {
@@ -140,20 +151,24 @@ export default defineComponent({
         message: 'Remover este item do carrinho?',
         header: 'Confirmação',
         icon: 'pi pi-exclamation-triangle',
+        rejectLabel: 'Cancelar',
+        acceptLabel: 'Remover',
+        acceptClass: 'p-button-danger',
         accept: () => {
           this.$emit('remove-item', productId)
           this.$toast.add({
             severity: 'success',
             summary: 'Removido',
             detail: 'Item removido do carrinho',
-            life: 3000
+            life: 2000,
           })
-        }
+        },
       })
     },
 
     confirmClearCart() {
-      this.$emit('clear-cart') // O App.vue já tem o confirm dialog
+      // Delega ao App.vue que tem o ConfirmDialog montado
+      this.$emit('clear-cart')
     },
 
     checkout() {
