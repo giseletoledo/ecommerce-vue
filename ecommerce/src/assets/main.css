@@ -1,12 +1,12 @@
-/* ===== IMPORTS (PRIMEIRO) ===== */
+/* Tailwind v4: uma única linha substitui as três diretivas do v3 */
+@import "tailwindcss";
+
+/* PrimeIcons */
 @import 'primeicons/primeicons.css';
 
-/* ===== TAILWIND (DEPOIS) ===== */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Dark mode via classe — alinhado com tailwind.config.js e PrimeVue */
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* ===== ESTILOS PERSONALIZADOS (POR ÚLTIMO) ===== */
 :root {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
