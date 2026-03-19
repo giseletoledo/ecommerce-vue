@@ -52,4 +52,11 @@ export class Cart {
   clear(): void {
     this.cartItems = []
   }
+
+  // Retorna uma nova instância da classe (preserva métodos) para forçar reatividade no Vue
+  clone(): Cart {
+    const copy = new Cart()
+    copy.cartItems = [...this.cartItems]
+    return copy
+  }
 }

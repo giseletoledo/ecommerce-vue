@@ -142,7 +142,7 @@ export default defineComponent({
 
     addToCart(product: Product) {
       this.cart.addItem(product)
-      this.cart = { ...this.cart } as CartModel
+      this.cart = this.cart.clone()
       this.$toast.add({
         severity: 'success',
         summary: 'Adicionado!',
@@ -153,12 +153,12 @@ export default defineComponent({
 
     removeUnit(id: number) {
       this.cart.removeUnit(id)
-      this.cart = { ...this.cart } as CartModel
+      this.cart = this.cart.clone()
     },
 
     removeItem(id: number) {
       this.cart.removeItem(id)
-      this.cart = { ...this.cart } as CartModel
+      this.cart = this.cart.clone()
     },
 
     confirmClearCart() {
@@ -171,7 +171,7 @@ export default defineComponent({
         acceptClass: 'p-button-danger',
         accept: () => {
           this.cart.clear()
-          this.cart = { ...this.cart } as CartModel
+          this.cart = this.cart.clone()
           this.$toast.add({
             severity: 'info',
             summary: 'Carrinho limpo',
