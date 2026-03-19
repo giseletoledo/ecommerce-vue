@@ -30,7 +30,7 @@
                 </h3>
 
                 <p class="text-gray-500 text-sm">
-                  {{ item.product.category.title }}
+                  {{ item.product.category.name }}
                 </p>
 
                 <p class="font-bold text-primary">

@@ -26,7 +26,7 @@
           </span>
 
           <span class="text-xl font-extrabold text-gray-900">
-            {{ formatCurrency(product.priceWithDiscountAplied()) }}
+            {{ formatCurrency(product.priceWithDiscountApplied()) }}
           </span>
 
           <Badge

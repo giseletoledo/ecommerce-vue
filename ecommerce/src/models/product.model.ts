@@ -10,7 +10,7 @@ export class Product {
     public discount?: number
   ) {}
 
-  priceWithDiscountAplied(): number {
+  priceWithDiscountApplied(): number {
     return this.price * (1 - (this.discount || 0))
   }
 }

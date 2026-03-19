@@ -49,8 +49,12 @@ export class Cart {
 
   getFinalPrice(): number {
     return this.listproducts.reduce(
-      (acc, item) => acc + item.product.priceWithDiscountAplied() * item.quantity, 
+      (acc, item) => acc + item.product.priceWithDiscountApplied() * item.quantity, 
       0
     )
+  }
+  setQuantity(product: Product, quantity: number): void {
+  const item = this.listproducts.find(i => i.product.id === product.id)
+  if (item) item.quantity = quantity
   }
 }
