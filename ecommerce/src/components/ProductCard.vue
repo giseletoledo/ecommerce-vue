@@ -1,34 +1,54 @@
 <template>
-  <div class="product-card">
-    <div class="product-badge">{{ product.category.title }}</div>
+  <Card class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <template #header>
+      <div class="flex justify-center p-4 bg-gray-50 dark:bg-gray-800">
+        <img 
+          :src="product.img" 
+          :alt="product.name"
+          class="w-32 h-32 object-contain"
+          @error="handleImageError"
+        />
+      </div>
+    </template>
 
-    <div class="product-icon">
-      <span>{{ productEmoji }}</span>
-    </div>
+    <template #title>
+      <h3 class="text-lg font-semibold">{{ product.name }}</h3>
+    </template>
 
-    <div class="product-info">
-      <h3 class="product-name">{{ product.name }}</h3>
-      <p class="product-price">{{ product.formattedPrice }}</p>
-    </div>
+    <template #subtitle>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        {{ product.category.title }}
+      </p>
+    </template>
 
-    <button class="btn-add" @click="$emit('add-to-cart', product)">
-      <span class="btn-icon">+</span>
-      Adicionar
-    </button>
-  </div>
+    <template #content>
+      <div class="flex justify-between items-center mt-2">
+        <p class="text-2xl font-bold text-primary">
+          R$ {{ product.priceWithDiscountApplied().toFixed(2) }}
+        </p>
+        
+        <span v-if="product.discount > 0" class="text-sm text-green-600 bg-green-100 px-2 py-1 rounded">
+          -{{ product.discount * 100 }}%
+        </span>
+      </div>
+    </template>
+
+    <template #footer>
+      <Button
+        label="Adicionar"
+        icon="pi pi-shopping-cart"
+        class="w-full"
+        severity="primary"
+        @click="$emit('add-to-cart', product)"
+      />
+    </template>
+  </Card>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { Product } from '../models/Product'
-
-const emojiMap: Record<string, string> = {
-  Eletrônicos: '💻',
-  'Moda & Roupas': '👕',
-  'Casa & Jardim': '🏡',
-  'Esportes & Lazer': '⚽',
-  Livros: '📚',
-}
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+import { Product } from '../models/product.model'
 
 export default defineComponent({
   name: 'ProductCard',
@@ -42,122 +62,11 @@ export default defineComponent({
 
   emits: ['add-to-cart'],
 
-  computed: {
-    productEmoji(): string {
-      return emojiMap[this.product.category.title] ?? '🛍️'
-    },
-  },
+  methods: {
+    handleImageError(e: Event) {
+      const img = e.target as HTMLImageElement
+      img.src = 'https://placehold.co/200x200?text=Produto'
+    }
+  }
 })
 </script>
-
-<style scoped>
-.product-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.product-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--accent-soft) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-}
-
-.product-card:hover::before {
-  opacity: 1;
-}
-
-.product-badge {
-  display: inline-flex;
-  align-items: center;
-  background: var(--badge-bg);
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 100px;
-  width: fit-content;
-  position: relative;
-  z-index: 1;
-}
-
-.product-icon {
-  font-size: 48px;
-  line-height: 1;
-  position: relative;
-  z-index: 1;
-}
-
-.product-info {
-  flex: 1;
-  position: relative;
-  z-index: 1;
-}
-
-.product-name {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 6px;
-  line-height: 1.3;
-}
-
-.product-price {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--accent);
-  margin: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.btn-add {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
-  position: relative;
-  z-index: 1;
-  letter-spacing: 0.02em;
-}
-
-.btn-add:hover {
-  background: var(--accent-dark);
-}
-
-.btn-add:active {
-  transform: scale(0.97);
-}
-
-.btn-icon {
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 1;
-}
-</style>

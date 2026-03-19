@@ -1,62 +1,125 @@
 <template>
-  <aside class="cart-panel" :class="{ 'cart-panel--empty': cart.totalItems === 0 }">
-    <div class="cart-header">
-      <h2 class="cart-title">Carrinho</h2>
-      <span class="cart-count" v-if="cart.totalItems > 0">
-        {{ cart.totalItems }} {{ cart.totalItems === 1 ? 'item' : 'itens' }}
-      </span>
-    </div>
-
-    <div class="cart-empty" v-if="cart.totalItems === 0">
-      <span class="cart-empty-icon">🛒</span>
-      <p>Seu carrinho está vazio</p>
-    </div>
-
-    <ul class="cart-list" v-else>
-      <li
-        v-for="item in cart.cartItems"
-        :key="item.product.id"
-        class="cart-item"
-      >
-        <div class="cart-item-info">
-          <span class="cart-item-name">{{ item.product.name }}</span>
-          <span class="cart-item-unit-price">{{ item.product.formattedPrice }} / un</span>
-        </div>
-
-        <div class="cart-item-controls">
-          <button class="ctrl-btn" @click="$emit('remove-unit', item.product.id)" title="Remover 1">−</button>
-          <span class="cart-item-qty">{{ item.quantity }}</span>
-          <button class="ctrl-btn" @click="$emit('add-to-cart', item.product)" title="Adicionar 1">+</button>
-          <button class="ctrl-btn ctrl-btn--delete" @click="$emit('remove-item', item.product.id)" title="Excluir">
-            🗑
-          </button>
-        </div>
-
-        <div class="cart-item-subtotal">
-          {{ formatCurrency(item.product.price * item.quantity) }}
-        </div>
-      </li>
-    </ul>
-
-    <div class="cart-footer" v-if="cart.totalItems > 0">
-      <div class="cart-total-row">
-        <span>Total</span>
-        <strong class="cart-total-price">{{ cart.formattedTotalPrice }}</strong>
+  <Card>
+    <template #title>
+      <div class="flex justify-between items-center">
+        <span class="text-xl font-bold">Carrinho de Compras</span>
+        <Badge :value="cart.totalItems" severity="danger" />
       </div>
-      <button class="btn-checkout" @click="$emit('clear-cart')">
-        Limpar carrinho
-      </button>
-    </div>
-  </aside>
+    </template>
+
+    <template #content>
+      <!-- Empty State com Card -->
+      <Card v-if="cart.totalItems === 0" class="bg-gray-50 dark:bg-gray-800">
+        <template #content>
+          <div class="text-center py-8">
+            <i class="pi pi-shopping-cart text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-500 dark:text-gray-400">Seu carrinho está vazio</p>
+            <p class="text-sm text-gray-400 mt-2">Adicione produtos para começar</p>
+          </div>
+        </template>
+      </Card>
+
+      <!-- DataView para listar itens -->
+      <DataView v-else :value="cart.cartItems" class="border rounded-lg">
+        <template #list="slotProps">
+          <div v-for="(item, index) in slotProps.items" :key="index">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4"
+                 :class="{ 'border-t': index !== 0 }">
+              
+              <!-- Info do produto -->
+              <div class="flex items-center gap-4">
+                <img 
+                  :src="item.product.img" 
+                  :alt="item.product.name"
+                  class="w-16 h-16 object-contain bg-gray-50 rounded"
+                  @error="handleImageError"
+                />
+                <div>
+                  <h4 class="font-semibold">{{ item.product.name }}</h4>
+                  <p class="text-sm text-gray-500">{{ item.product.category.title }}</p>
+                  <p class="text-sm font-bold text-primary">
+                    R$ {{ item.product.formattedPrice }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Controles de quantidade com InputNumber -->
+              <div class="flex items-center gap-4 ml-auto">
+                <div class="flex items-center gap-2">
+                  <InputNumber
+                    v-model="item.quantity"
+                    :min="1"
+                    showButtons
+                    buttonLayout="horizontal"
+                    decrementButtonClass="p-button-secondary"
+                    incrementButtonClass="p-button-secondary"
+                    @update:modelValue="updateQuantity(item.product.id, $event)"
+                  />
+                </div>
+
+                <!-- Subtotal -->
+                <p class="font-bold w-20 text-right">
+                  R$ {{ (item.product.priceWithDiscountApplied() * item.quantity).toFixed(2) }}
+                </p>
+
+                <!-- Botão remover -->
+                <Button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  text
+                  @click="confirmRemoveItem(item.product.id)"
+                />
+              </div>
+            </div>
+          </div>
+        </template>
+      </DataView>
+    </template>
+
+    <!-- Footer com total e ações -->
+    <template #footer v-if="cart.totalItems > 0">
+      <div class="border-t pt-4">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-lg font-semibold">Total:</span>
+          <span class="text-2xl font-bold text-primary">
+            {{ cart.formattedTotalPrice }}
+          </span>
+        </div>
+
+        <div class="flex gap-2">
+          <Button
+            label="Limpar carrinho"
+            icon="pi pi-trash"
+            severity="danger"
+            class="flex-1"
+            @click="confirmClearCart"
+          />
+          <Button
+            label="Finalizar"
+            icon="pi pi-check"
+            severity="success"
+            class="flex-1"
+            @click="checkout"
+          />
+        </div>
+      </div>
+    </template>
+  </Card>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type {  PropType } from 'vue'
-import { Cart } from '../models/Cart'
+import type { PropType } from 'vue'
+import { Cart } from '../models/cart.model'
+import type { Product } from '../models/product.model'
+import Badge from 'primevue/badge'
 
 export default defineComponent({
   name: 'Cart',
+
+  components: {
+    Badge
+  },
 
   props: {
     cart: {
@@ -68,197 +131,44 @@ export default defineComponent({
   emits: ['add-to-cart', 'remove-unit', 'remove-item', 'clear-cart'],
 
   methods: {
-    formatCurrency(value: number): string {
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      }).format(value)
+    updateQuantity(productId: number, quantity: number) {
+      // Implementar lógica de atualização
     },
-  },
+
+    confirmRemoveItem(productId: number) {
+      this.$confirm.require({
+        message: 'Remover este item do carrinho?',
+        header: 'Confirmação',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          this.$emit('remove-item', productId)
+          this.$toast.add({
+            severity: 'success',
+            summary: 'Removido',
+            detail: 'Item removido do carrinho',
+            life: 3000
+          })
+        }
+      })
+    },
+
+    confirmClearCart() {
+      this.$emit('clear-cart') // O App.vue já tem o confirm dialog
+    },
+
+    checkout() {
+      this.$toast.add({
+        severity: 'success',
+        summary: 'Compra finalizada!',
+        detail: 'Obrigado por comprar conosco',
+        life: 5000
+      })
+    },
+
+    handleImageError(e: Event) {
+      const img = e.target as HTMLImageElement
+      img.src = 'https://placehold.co/100x100?text=Produto'
+    }
+  }
 })
 </script>
-
-<style scoped>
-.cart-panel {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  height: fit-content;
-  position: sticky;
-  top: 24px;
-}
-
-.cart-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.cart-title {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.cart-count {
-  background: var(--accent);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 100px;
-}
-
-.cart-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 32px 0;
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-.cart-empty-icon {
-  font-size: 40px;
-  opacity: 0.4;
-}
-
-.cart-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.cart-item {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.cart-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.cart-item-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.cart-item-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.cart-item-unit-price {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.cart-item-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ctrl-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text-primary);
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-
-.ctrl-btn:hover {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-
-.ctrl-btn--delete {
-  margin-left: auto;
-  font-size: 13px;
-}
-
-.ctrl-btn--delete:hover {
-  background: #ef4444;
-  border-color: #ef4444;
-}
-
-.cart-item-qty {
-  min-width: 24px;
-  text-align: center;
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--text-primary);
-}
-
-.cart-item-subtotal {
-  font-weight: 800;
-  font-size: 15px;
-  color: var(--accent);
-  text-align: right;
-}
-
-.cart-footer {
-  border-top: 2px solid var(--border);
-  padding-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.cart-total-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
-  color: var(--text-primary);
-}
-
-.cart-total-price {
-  font-size: 24px;
-  color: var(--accent);
-  font-family: var(--font-display);
-}
-
-.btn-checkout {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 11px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-.btn-checkout:hover {
-  background: #fee2e2;
-  color: #ef4444;
-  border-color: #fca5a5;
-}
-</style>
