@@ -1,19 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class',
   content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{vue,ts,tsx}',
+    './node_modules/primevue/**/*.{js,vue,ts}',
   ],
   theme: {
-    extend: {
-      colors: {
-        primary: {
-          DEFAULT: '#3B82F6',
-          dark: '#2563EB'
-        }
-      }
-    },
+    extend: {},
   },
   plugins: [],
 }

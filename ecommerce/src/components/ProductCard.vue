@@ -1,44 +1,49 @@
 <template>
-  <Card class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+  <Card class="h-full flex flex-col overflow-hidden hover:-translate-y-1 transition-transform duration-200 shadow-sm hover:shadow-lg">
     <template #header>
-      <div class="flex justify-center p-4 bg-gray-50 dark:bg-gray-800">
-        <img 
-          :src="product.img" 
-          :alt="product.name"
-          class="w-32 h-32 object-contain"
-          @error="handleImageError"
-        />
-      </div>
-    </template>
-
-    <template #title>
-      <h3 class="text-lg font-semibold">{{ product.name }}</h3>
-    </template>
-
-    <template #subtitle>
-      <p class="text-sm text-gray-500 dark:text-gray-400">
-        {{ product.category.title }}
-      </p>
+      <img
+        :src="product.img"
+        :alt="product.name"
+        class="w-full object-cover"
+        style="aspect-ratio: 4/3"
+      />
     </template>
 
     <template #content>
-      <div class="flex justify-between items-center mt-2">
-        <p class="text-2xl font-bold text-primary">
-          R$ {{ product.priceWithDiscountApplied().toFixed(2) }}
-        </p>
-        
-        <span v-if="product.discount > 0" class="text-sm text-green-600 bg-green-100 px-2 py-1 rounded">
-          -{{ product.discount * 100 }}%
-        </span>
+      <div class="flex flex-col gap-2">
+        <Tag :value="product.category.toString()" severity="info" class="w-fit text-xs" />
+
+        <h3 class="font-bold text-gray-800 text-base leading-snug">
+          {{ product.name }}
+        </h3>
+
+        <div class="flex items-baseline gap-2 flex-wrap">
+          <span
+            v-if="product.discount"
+            class="text-sm text-gray-400 line-through"
+          >
+            {{ formatCurrency(product.price) }}
+          </span>
+
+          <span class="text-xl font-extrabold text-gray-900">
+            {{ formatCurrency(product.priceWithDiscountAplied()) }}
+          </span>
+
+          <Badge
+            v-if="product.discount"
+            :value="`-${(product.discount * 100).toFixed(0)}%`"
+            severity="success"
+            class="text-xs"
+          />
+        </div>
       </div>
     </template>
 
     <template #footer>
       <Button
-        label="Adicionar"
-        icon="pi pi-shopping-cart"
+        label="Adicionar ao carrinho"
+        icon="pi pi-cart-plus"
         class="w-full"
-        severity="primary"
         @click="$emit('add-to-cart', product)"
       />
     </template>
@@ -46,12 +51,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import type { PropType } from 'vue'
+import { defineComponent, type PropType } from 'vue'
 import { Product } from '../models/product.model'
+import Card from 'primevue/card'
+import Button from 'primevue/button'
+import Tag from 'primevue/tag'
+import Badge from 'primevue/badge'
 
 export default defineComponent({
   name: 'ProductCard',
+
+  components: { Card, Button, Tag, Badge },
 
   props: {
     product: {
@@ -63,10 +73,12 @@ export default defineComponent({
   emits: ['add-to-cart'],
 
   methods: {
-    handleImageError(e: Event) {
-      const img = e.target as HTMLImageElement
-      img.src = 'https://placehold.co/200x200?text=Produto'
-    }
-  }
+    formatCurrency(value: number): string {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(value)
+    },
+  },
 })
 </script>

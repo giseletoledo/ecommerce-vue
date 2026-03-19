@@ -1,7 +1,6 @@
-import type { Category } from "./category.model";
+import type { Category } from './category.model'
 
 export class Product {
-
   constructor(
     public id: number,
     public name: string,
@@ -9,12 +8,9 @@ export class Product {
     public price: number,
     public category: Category,
     public discount?: number
-  ) { }
-  priceWithDiscountApplied(): number {
-    return this.price * (1 - (this.discount || 0));
-  };
+  ) {}
 
-  get formattedPrice(): string {
-    return this.priceWithDiscountApplied().toFixed(2);
+  priceWithDiscountAplied(): number {
+    return this.price * (1 - (this.discount || 0))
   }
 }

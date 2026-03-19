@@ -6,57 +6,51 @@ export interface CartItem {
 }
 
 export class Cart {
-  cartItems: CartItem[] = []
-
-  get totalItems(): number {
-    return this.cartItems.reduce((acc, item) => acc + item.quantity, 0)
-  }
-
-  get totalPrice(): number {
-    return this.cartItems.reduce(
-      (acc, item) => acc + item.product.priceWithDiscountApplied() * item.quantity,
-      0
-    )
-  }
-
-  get formattedTotalPrice(): string {
-    return this.totalPrice.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    })
-  }
+  listproducts: CartItem[] = []
 
   addItem(product: Product): void {
-    const existing = this.cartItems.find((i) => i.product.id === product.id)
+    const existing = this.listproducts.find(item => item.product.id === product.id)
     if (existing) {
       existing.quantity++
     } else {
-      this.cartItems.push({ product, quantity: 1 })
+      this.listproducts.push({ product, quantity: 1 })
     }
   }
 
-  removeUnit(productId: number): void {
-    const item = this.cartItems.find((i) => i.product.id === productId)
-    if (!item) return
+  removeUnit(product: Product): void {
+  const index = this.listproducts.findIndex(item => item.product.id === product.id)
+  
+  // Early return se não encontrar o item
+  if (index < 0) return
+
+  const item = this.listproducts[index]
+  
+  // Type guard para garantir que item não é undefined
+  if (item) {
     if (item.quantity > 1) {
       item.quantity--
     } else {
-      this.removeItem(productId)
+      this.listproducts.splice(index, 1)
     }
   }
+}
 
-  removeItem(productId: number): void {
-    this.cartItems = this.cartItems.filter((i) => i.product.id !== productId)
+  removeItem(product: Product): void {
+    this.listproducts = this.listproducts.filter(item => item.product.id !== product.id)
   }
 
   clear(): void {
-    this.cartItems = []
+    this.listproducts = []
   }
 
-  // Retorna uma nova instância da classe (preserva métodos) para forçar reatividade no Vue
-  clone(): Cart {
-    const copy = new Cart()
-    copy.cartItems = [...this.cartItems]
-    return copy
+  getTotalItems(): number {
+    return this.listproducts.reduce((acc, item) => acc + item.quantity, 0)
+  }
+
+  getFinalPrice(): number {
+    return this.listproducts.reduce(
+      (acc, item) => acc + item.product.priceWithDiscountAplied() * item.quantity, 
+      0
+    )
   }
 }
