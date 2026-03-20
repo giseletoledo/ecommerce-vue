@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-5 h-full">
         <!-- Header -->
         <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-extrabold text-gray-900" style="font-family: var(--font-display)">
+            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white" style="font-family: var(--font-display)">
                 Carrinho
             </h2>
             <Badge v-if="cart.getTotalItems() > 0" :value="cart.getTotalItems()" severity="info" class="text-sm" />
@@ -61,7 +61,9 @@
             <Button label="Finalizar compra" icon="pi pi-check" class="w-full" severity="success" />
 
             <Button label="Limpar carrinho" icon="pi pi-trash" class="w-full" severity="danger" outlined
-                @click="$emit('clear-cart')" />
+                @click="confirmClear" />
+
+            <ConfirmDialog />
         </div>
     </div>
 </template>
@@ -75,11 +77,13 @@ import Badge from 'primevue/badge'
 import Divider from 'primevue/divider'
 import InputNumber from 'primevue/inputnumber'
 import { Product } from '../models/product.model'
+import { useConfirm } from 'primevue/useconfirm'
+import ConfirmDialog from 'primevue/confirmdialog'
 
 export default defineComponent({
     name: 'CartSidebar',
 
-    components: { Button, Badge, Divider, InputNumber },
+    components: { Button, Badge, Divider, InputNumber, ConfirmDialog },
 
     props: {
         cart: {
@@ -89,7 +93,11 @@ export default defineComponent({
     },
 
     emits: ['add-to-cart', 'remove-unit', 'remove-item', 'clear-cart', 'set-quantity'],
-
+    
+    setup() {
+        const confirm = useConfirm()
+        return { confirm }
+    },
     methods: {
         formatCurrency(value: number): string {
             return new Intl.NumberFormat('pt-BR', {
@@ -100,6 +108,16 @@ export default defineComponent({
         onQuantityChange(product: Product, value: number | null): void {
             if (!value || value < 1) return
             this.$emit('set-quantity', product, value)
+        },
+        confirmClear(): void {
+            this.confirm.require({
+                message: 'Tem certeza que deseja limpar o carrinho?',
+                header: 'Confirmação',
+                icon: 'pi pi-exclamation-triangle',
+                acceptLabel: 'Sim, limpar',
+                rejectLabel: 'Não, cancelar',
+                accept: () => this.$emit('clear-cart'),
+            })
         },
     },
 })

@@ -13,19 +13,19 @@
       <div class="flex flex-col gap-2">
         <Tag :value="product.category.toString()" severity="info" class="w-fit text-xs" />
 
-        <h3 class="font-bold text-gray-800 text-base leading-snug">
+        <h3 class="font-bold text-gray-800 dark:text-gray-100 text-base leading-snug">
           {{ product.name }}
         </h3>
 
         <div class="flex items-baseline gap-2 flex-wrap">
           <span
             v-if="product.discount"
-            class="text-sm text-gray-400 line-through"
+            class="text-sm text-gray-400 dark:text-gray-500 line-through"
           >
             {{ formatCurrency(product.price) }}
           </span>
 
-          <span class="text-xl font-extrabold text-gray-900">
+          <span class="text-xl font-extrabold text-gray-900 dark:text-white">
             {{ formatCurrency(product.priceWithDiscountApplied()) }}
           </span>
 

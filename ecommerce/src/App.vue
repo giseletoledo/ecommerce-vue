@@ -1,18 +1,16 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
     <!-- Header -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
       <div class="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between">
-        <span class="text-2xl font-extrabold text-blue-600 tracking-tight" style="font-family: var(--font-display)">
+        <span class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight" style="font-family: var(--font-display)">
           VueShop
         </span>
 
         <div class="flex items-center gap-3">
-          <span
-            class="hidden sm:inline-flex text-xs font-bold text-gray-400 uppercase tracking-widest border border-gray-200 rounded-full px-3 py-1">
-            Options API · TypeScript
-          </span>
+
+          <Button :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'" rounded text severity="secondary" @click="toggleDark" />
 
           <!-- Cart button (mobile) -->
           <Button icon="pi pi-shopping-cart" rounded text severity="secondary" class="relative lg:hidden"
@@ -31,10 +29,10 @@
         <!-- Products section -->
         <section class="flex-1 min-w-0">
           <div class="flex items-baseline gap-3 mb-8">
-            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight" style="font-family: var(--font-display)">
+            <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight" style="font-family: var(--font-display)">
               Produtos
             </h1>
-            <span class="text-sm text-gray-400 font-medium">
+            <span class="text-sm text-gray-400 dark:text-gray-500 font-medium">
               {{ products ? products.length : 0 }} disponíveis
             </span>
           </div>
@@ -50,14 +48,9 @@
 
         <!-- Sidebar cart (desktop) -->
         <aside v-if="cart"
-          class="hidden lg:flex flex-col w-96 shrink-0 sticky top-24 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm max-h-[calc(100vh-8rem)] overflow-y-auto">
-          <CartSidebar 
-            :cart="cart" 
-            @add-to-cart="addToCart" 
-            @remove-unit="removeUnit" 
-            @remove-item="removeItem"
-            @clear-cart="clearCart"
-            @set-quantity="setQuantity" />
+          class="hidden lg:flex flex-col w-96 shrink-0 sticky top-24 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm max-h-[calc(100vh-8rem)] overflow-y-auto">
+          <CartSidebar :cart="cart" @add-to-cart="addToCart" @remove-unit="removeUnit" @remove-item="removeItem"
+            @clear-cart="clearCart" @set-quantity="setQuantity" />
         </aside>
 
       </div>
@@ -69,14 +62,8 @@
         root: 'z-[100]',
         mask: 'z-[99]'
       }">
-        <CartSidebar 
-          v-if="cart" 
-          :cart="cart" 
-          @add-to-cart="addToCart" 
-          @remove-unit="removeUnit"
-          @remove-item="removeItem" 
-          @clear-cart="clearCart"
-          @set-quantity="setQuantity" />
+        <CartSidebar v-if="cart" :cart="cart" @add-to-cart="addToCart" @remove-unit="removeUnit"
+          @remove-item="removeItem" @clear-cart="clearCart" @set-quantity="setQuantity" />
       </Drawer>
     </Teleport>
 
@@ -132,6 +119,7 @@ export default defineComponent({
       products: [] as Product[],
       cart: null as Cart | null,
       cartVisible: false,
+      isDark: false,
     }
   },
 
@@ -182,6 +170,10 @@ export default defineComponent({
       if (!this.cart) return
       this.cart.setQuantity(product, quantity)
     },
+    toggleDark(): void {
+      this.isDark = !this.isDark
+      document.documentElement.classList.toggle('dark', this.isDark)
+    },
   },
 })
 </script>
@@ -190,8 +182,8 @@ export default defineComponent({
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
 }
 
 body {
