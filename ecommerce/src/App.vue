@@ -13,11 +13,21 @@
           <Button :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'" rounded text severity="secondary" @click="toggleDark" />
 
           <!-- Cart button (mobile) -->
-          <Button icon="pi pi-shopping-cart" rounded text severity="secondary" class="relative lg:hidden"
-            @click="cartVisible = true">
-            <Badge v-if="cart && cart.getTotalItems() > 0" :value="cart.getTotalItems()" severity="danger"
-              class="absolute -top-2 -right-2" />
-          </Button>
+          <div class="relative">
+  <Button 
+    icon="pi pi-shopping-cart" 
+    rounded 
+    text 
+    severity="secondary" 
+    @click="cartVisible = true" 
+  />
+  <Badge 
+    v-if="cart && cart.getTotalItems() > 0" 
+    :value="cart.getTotalItems()" 
+    severity="danger"
+    class="absolute -top-1 -right-1 !text-xs pointer-events-none"
+  />
+</div>
         </div>
       </div>
     </header>
@@ -45,13 +55,6 @@
             <p>Carregando produtos...</p>
           </div>
         </section>
-
-        <!-- Sidebar cart (desktop) -->
-        <aside v-if="cart"
-          class="hidden lg:flex flex-col w-96 shrink-0 sticky top-24 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm max-h-[calc(100vh-8rem)] overflow-y-auto">
-          <CartSidebar :cart="cart" @add-to-cart="addToCart" @remove-unit="removeUnit" @remove-item="removeItem"
-            @clear-cart="clearCart" @set-quantity="setQuantity" />
-        </aside>
 
       </div>
     </main>

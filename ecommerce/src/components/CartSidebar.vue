@@ -2,9 +2,6 @@
     <div class="flex flex-col gap-5 h-full">
         <!-- Header -->
         <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white" style="font-family: var(--font-display)">
-                Carrinho
-            </h2>
             <Badge v-if="cart.getTotalItems() > 0" :value="cart.getTotalItems()" severity="info" class="text-sm" />
         </div>
 
