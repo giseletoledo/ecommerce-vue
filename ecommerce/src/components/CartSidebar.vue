@@ -50,7 +50,7 @@
                 <span class="text-sm text-gray-500">
                     Total ({{ cart.getTotalItems() }} {{ cart.getTotalItems() === 1 ? 'item' : 'itens' }})
                 </span>
-                <span class="text-2xl font-extrabold text-blue-600" style="font-family: var(--font-display)">
+                <span class="text-2xl font-extrabold text-blue-600">
                     {{ formatCurrency(cart.getFinalPrice()) }}
                 </span>
             </div>
