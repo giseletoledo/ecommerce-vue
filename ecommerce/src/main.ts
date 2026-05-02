@@ -1,16 +1,16 @@
 import './assets/main.css'
 
-// Vue
 import { createApp } from 'vue'
-
-// App
 import App from './App.vue'
+
+// Router
+import router from './router'
 
 // PrimeVue
 import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 
-// Componentes PrimeVue 
+// PrimeVue components
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import DataView from 'primevue/dataview'
@@ -25,19 +25,19 @@ import 'primeicons/primeicons.css'
 
 const app = createApp(App)
 
-// Plugins PrimeVue
+app.use(router)
+
 app.use(PrimeVue, {
-    theme: {
-        preset: Aura,
-        options: {
-            darkModeSelector: '.dark',
-        }
+  theme: {
+    preset: Aura,
+    options: {
+      darkModeSelector: '.dark',
     }
+  }
 })
 app.use(ToastService)
 app.use(ConfirmationService)
 
-// Registrar componentes globais
 app.component('Button', Button)
 app.component('Card', Card)
 app.component('DataView', DataView)
