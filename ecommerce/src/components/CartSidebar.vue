@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col gap-5 h-full">
-        <!-- Header -->
+        <!-- Badge count -->
         <div class="flex items-center justify-between">
             <Badge v-if="cart.getTotalItems() > 0" :value="cart.getTotalItems()" severity="info" class="text-sm" />
         </div>
@@ -55,7 +55,14 @@
                 </span>
             </div>
 
-            <Button label="Finalizar compra" icon="pi pi-check" class="w-full" severity="success" />
+            <!-- Emite 'checkout' para o layout tratar o redirecionamento -->
+            <Button
+                label="Finalizar compra"
+                icon="pi pi-check"
+                class="w-full"
+                severity="success"
+                @click="$emit('checkout')"
+            />
 
             <Button label="Limpar carrinho" icon="pi pi-trash" class="w-full" severity="danger" outlined
                 @click="confirmClear" />
@@ -89,12 +96,14 @@ export default defineComponent({
         },
     },
 
-    emits: ['add-to-cart', 'remove-unit', 'remove-item', 'clear-cart', 'set-quantity'],
-    
+    // Adicionando 'checkout' aos emits
+    emits: ['add-to-cart', 'remove-unit', 'remove-item', 'clear-cart', 'set-quantity', 'checkout'],
+
     setup() {
         const confirm = useConfirm()
         return { confirm }
     },
+
     methods: {
         formatCurrency(value: number): string {
             return new Intl.NumberFormat('pt-BR', {
