@@ -190,11 +190,19 @@ export default defineComponent({
   border-color: #374151;
 }
 :deep(.p-datatable .p-datatable-tbody > tr) {
-  background-color: #1f2937;
+  background-color: #1f2937;  /* todas as linhas: gray-800 */
   color: #e5e7eb;
 }
-:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+
+:deep(.p-datatable.p-datatable-striped .p-datatable-tbody > tr.p-row-odd) {
   background-color: #374151;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:nth-child(even)) {
+  background-color: #374151;  /* linhas pares: gray-700 (era branco) */
+}
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: #4b5563;  /* hover: gray-600 */
 }
 :deep(.p-paginator) {
   background-color: #1f2937;

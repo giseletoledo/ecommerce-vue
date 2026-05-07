@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-900 flex items-center justify-center p-6">
     <Card class="w-full max-w-md !bg-gray-800 !border-gray-700">
+
       <template #title>
         <div class="text-center">
           <i class="pi pi-shield text-4xl text-blue-400 mb-3 block"></i>
@@ -10,40 +11,50 @@
       </template>
 
       <template #content>
-        <div class="space-y-4">
-          <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium text-gray-300">Usuário</label>
+        <form class="flex flex-col gap-4" @submit.prevent="submitLogin">
+
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-300">E-mail</label>
             <InputText
-              v-model="username"
-              placeholder="admin"
+              v-model="form.email"
+              placeholder="admin@vueshop.com"
               class="w-full !bg-gray-700 !border-gray-600 !text-white"
+              :class="{ 'p-invalid': v$.email.$error }"
+              @blur="v$.email.$touch()"
             />
+            <span v-if="v$.email.$error" class="text-red-400 text-xs mt-0.5">
+              {{ v$.email.$errors[0]?.$message }}
+            </span>
           </div>
 
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1">
             <label class="text-sm font-medium text-gray-300">Senha</label>
             <Password
-              v-model="password"
+              v-model="form.password"
               :feedback="false"
               toggleMask
               placeholder="••••••••"
               class="w-full"
               inputClass="w-full !bg-gray-700 !border-gray-600 !text-white"
+              :class="{ 'p-invalid': v$.password.$error }"
+              @blur="v$.password.$touch()"
             />
+            <span v-if="v$.password.$error" class="text-red-400 text-xs mt-0.5">
+              {{ v$.password.$errors[0]?.$message }}
+            </span>
           </div>
 
-          <Message v-if="error" severity="error" :closable="false">
-            {{ error }}
-          </Message>
-
           <Button
+            type="submit"
             label="Entrar como Administrador"
             icon="pi pi-lock-open"
             class="w-full justify-center"
             severity="warning"
-            @click="login"
+            :loading="auth.loading"
+            :disabled="auth.loading"
           />
-        </div>
+
+        </form>
       </template>
 
       <template #footer>
@@ -53,42 +64,82 @@
           </RouterLink>
         </div>
       </template>
+
     </Card>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useVuelidate } from '@vuelidate/core'
+import { required, email, helpers } from '@vuelidate/validators'
+import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '../../stores/auth.store'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
-import Message from 'primevue/message'
-
-const ADMIN_USER = import.meta.env.VITE_ADMIN_USER
-const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS
 
 export default defineComponent({
   name: 'AdminLoginView',
-  components: { Card, Button, InputText, Password, Message },
+  components: { Card, Button, InputText, Password },
+
   setup() {
     const router = useRouter()
-    const username = ref('')
-    const password = ref('')
-    const error = ref('')
+    const toast = useToast()
+    const auth = useAuthStore()
 
-    const login = () => {
-      error.value = ''
-      if (username.value === ADMIN_USER && password.value === ADMIN_PASS) {
-        localStorage.setItem('user_role', 'ADMIN')
+    const form = reactive({ email: '', password: '' })
+
+    const rules = {
+      email: {
+        required: helpers.withMessage('E-mail é obrigatório.', required),
+        email: helpers.withMessage('Informe um e-mail válido.', email),
+      },
+      password: {
+        required: helpers.withMessage('Senha é obrigatória.', required),
+      },
+    }
+    const v$ = useVuelidate(rules, form)
+
+    async function submitLogin() {
+      const valid = await v$.value.$validate()
+      if (!valid) return
+
+      try {
+        await auth.login(form.email, form.password)
+
+        // Garante que a conta tem perfil ADMIN
+        if (!auth.isAdmin) {
+          auth.logout()
+          toast.add({
+            severity: 'error',
+            summary: 'Acesso negado',
+            detail: 'Esta conta não tem permissão de administrador.',
+            life: 4000,
+          })
+          return
+        }
+
+        toast.add({
+          severity: 'success',
+          summary: 'Acesso concedido',
+          detail: `Bem-vindo, ${auth.user?.name}!`,
+          life: 3000,
+        })
         router.push('/admin')
-      } else {
-        error.value = 'Usuário ou senha incorretos.'
+      } catch (err: any) {
+        toast.add({
+          severity: 'error',
+          summary: 'Credenciais inválidas',
+          detail: err.message,
+          life: 4000,
+        })
       }
     }
 
-    return { username, password, error, login }
-  }
+    return { form, v$, submitLogin, auth }
+  },
 })
 </script>
