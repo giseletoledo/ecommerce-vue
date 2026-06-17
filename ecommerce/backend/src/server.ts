@@ -1,6 +1,7 @@
 import express from 'express'
 import { loggerMiddleware } from './middlewares/logger'
 import productsRouter from './routes/products.router'
+import categoryRouter from './routes/category.router'
 import ordersRouter from './routes/orders.router'
 
 const app = express()
@@ -12,6 +13,7 @@ app.use(loggerMiddleware)      // loga todas as requisições
 
 // ─── Rotas ──────────────────────────────────────────────────
 app.use('/products', productsRouter)
+app.use('/category', categoryRouter)
 app.use('/orders', ordersRouter)
 
 // ─── Rota raiz (healthcheck) ─────────────────────────────────
